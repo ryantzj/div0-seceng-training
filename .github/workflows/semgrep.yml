@@ -3,11 +3,13 @@ on:
   pull_request: {}
   push:
     branches:
-    - main
+      - main
   schedule:
-  # random HH:MM to avoid a load spike on GitHub Actions at 00:00
-  - cron: 19 9 * * *
+    # Schedule to run every day at 9 PM
+    - cron: '0 21 * * *'
+
 name: Semgrep
+
 jobs:
   semgrep:
     name: semgrep/ci
@@ -15,20 +17,16 @@ jobs:
     container:
       image: returntocorp/semgrep
     steps:
-    
-    - name: Repo Checkout 
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - name: Repo Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Semgrep Scan
-    - run: semgrep scan --config auto --severity ERROR --sarif-output=semgrep.sarif juice-shop/
+      - name: Semgrep Scan
+        run: semgrep scan --config auto --severity ERROR --sarif-output=semgrep.sarif juice-shop/
 
-    - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: semgrep.sarif
-        category: semgrep
-
-    
-    
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
