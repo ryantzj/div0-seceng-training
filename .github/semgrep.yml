@@ -1,0 +1,40 @@
+on:
+  workflow_dispatch: {}
+  pull_request: {}
+  push:
+    branches:
+    - main
+  schedule:
+  # random HH:MM to avoid a load spike on GitHub Actions at 00:00
+  - cron: 19 9 * * *
+name: Semgrep
+jobs:
+  semgrep:
+    name: semgrep/ci
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
+    steps:
+
+    - name: Repo Checkout 
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Semgrep Scan
+    - run: semgrep scan --config auto --severity ERROR --sarif-output=semgrep.sarif juice-shop/
+    
+    - name: Save SARIF results as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: semgrep--results
+        path: semgrep.sarif
+
+    - name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: semgrep.sarif
+        category: semgrep
+
+    
+    
