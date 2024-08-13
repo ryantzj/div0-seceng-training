@@ -1,14 +1,15 @@
 on:
+  # This Semgrep workflow will scan the submodule and upload the result to github as Sarif
+  # This workflow can be trigger manually, on pull request, on Push and periodically.
   workflow_dispatch: {}
   pull_request: {}
   push:
     branches:
       - main
   schedule:
-    # random HH:MM to avoid a load spike on GitHub Actions at 00:00
+    # The workflow will be trigger everyday at 21:00
     - cron: '0 21 * * *'
 name: Semgrep
-
 jobs:
   semgrep:
     name: semgrep/ci
@@ -20,7 +21,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
+    # The semgrep scan will be run in auto config mode and run rulesets depending on the languages identified
+    # Only Highest severity (ERROR) will be show
+    # Output will be save in sarif
       - name: Semgrep Scan
         run: semgrep scan --config auto --severity ERROR --sarif-output=semgrep.sarif juice-shop/
     
